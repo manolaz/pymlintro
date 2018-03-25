@@ -101,7 +101,8 @@ baseballbids = se.execute("select * from Bid where onitem=:id", {'id':1})
 connection = se.connection(Bid)
 
 #Perform a query to find out which user placed the highest bid
-highbid_price = Bid.query.order_by(Bid.price).first()
-highbid_user_id = Bid.placeby.query.filterby(Bid.price == highbid_price).first()
-highbid_user_name= User.query.get(highbid_user_id)
+highbid = Bid.query.order_by(Bid.price).first()
+highbid_user_id = highbid.placeby
+highbid_user= User.query.get(highbid_user_id)
+highbid_user_name = highbid_user.username
 print(highbid_user_name)
