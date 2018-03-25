@@ -66,9 +66,6 @@ class Auction(db.Model):
 #reset old DB
 db.drop_all()
 
-#initalize DB
-db.create_all()
-
 #create 3 user
 u1 = User(id='1',username='UserOne',password='111')
 u2 = User(id='2',username='UserSecond',password='222')
@@ -96,13 +93,12 @@ bid4 = Bid(id='4',price='899.99',placeby='3',onitem='1',auction='1')
 Session = sessionmaker(bind=engine)
 se = Session()
 
-#try to find every bids placed on BASEBALL
-baseballbids = se.execute("select * from Bid where onitem=:id", {'id':1})
-connection = se.connection(Bid)
-
 #Perform a query to find out which user placed the highest bid
 highbid = Bid.query.order_by(Bid.price).first()
 highbid_user_id = highbid.placeby
 highbid_user= User.query.get(highbid_user_id)
 highbid_user_name = highbid_user.username
 print(highbid_user_name)
+
+#initalize DB
+db.create_all()
