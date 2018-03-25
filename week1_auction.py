@@ -65,6 +65,8 @@ class Auction(db.Model):
 
 #reset old DB
 db.drop_all()
+#initalize DB
+db.create_all()
 
 #create 3 user
 u1 = User(id='1',username='UserOne',password='111')
@@ -100,5 +102,4 @@ highbid_user= User.query.get(highbid_user_id)
 highbid_user_name = highbid_user.username
 print(highbid_user_name)
 
-#initalize DB
-db.create_all()
+
