@@ -25,56 +25,61 @@ autionned = db.Table('auctionned',
 	)
 
 class Item(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	start_time = db.Column(db.DateTime)
-	name = db.Column(db.String(120), unique=True, nullable=False)
-	description = db.Column(db.String(240),  nullable=False)
-	owner = db.Column(db.Integer, ForeignKey('user.id'))
-	auctions = db.relationship('Auction', secondary=autionned, lazy='subquery',backref=db.backref( 'item', lazy=True))
-	bids= db.relationship('Bid', secondary=bidon, lazy='subquery',backref=db.backref( 'item', lazy=True))
+	def __init__(self):
+		id = db.Column(db.Integer, primary_key=True)
+		start_time = db.Column(db.DateTime)
+		name = db.Column(db.String(120), unique=True, nullable=False)
+		description = db.Column(db.String(240),  nullable=False)
+		owner = db.Column(db.Integer, ForeignKey('user.id'))
+		auctions = db.relationship('Auction', secondary=autionned, lazy='subquery',backref=db.backref( 'item', lazy=True))
+		bids= db.relationship('Bid', secondary=bidon, lazy='subquery',backref=db.backref( 'item', lazy=True))
 	def __repr__(self):
 		return '<Item %r>' % self.itemname
 
 class User(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	username = db.Column(db.String(80), unique=True, nullable=False)
-	password = db.Column(db.String(120), unique=True, nullable=False)
-	asset = db.relationship('Item', backref='user', lazy=True)
-	bids = db.relationship('Bid', backref='user', lazy=True)
-	auctions = db.relationship('Auction', backref='user', lazy=True)
+	def __init__(self):
+		id = db.Column(db.Integer, primary_key=True)
+		username = db.Column(db.String(80), unique=True, nullable=False)
+		password = db.Column(db.String(120), unique=True, nullable=False)
+		asset = db.relationship('Item', backref='user', lazy=True)
+		bids = db.relationship('Bid', backref='user', lazy=True)
+		auctions = db.relationship('Auction', backref='user', lazy=True)
 	def __repr__(self):
 		return '<User %r>' % self.username
 
 class Bid(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	price = db.Column(db.Float, unique=True, nullable=False)
-	auction = db.Column(db.Integer, ForeignKey('auction.id'))
-	placeby = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
-	onitem = db.Column(db.Integer, db.ForeignKey('item.id'),nullable=False)
+	def __init__(self):
+		id = db.Column(db.Integer, primary_key=True)
+		price = db.Column(db.Float, unique=True, nullable=False)
+		auction = db.Column(db.Integer, ForeignKey('auction.id'))
+		placeby = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
+		onitem = db.Column(db.Integer, db.ForeignKey('item.id'),nullable=False)
 	def __repr__(self):
 		return '<Bid %r>' % self.price
 
 class Auction(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	price = db.Column(db.Float, unique=True, nullable=False)
-	placeby = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
-	onitem = db.Column(db.Integer, db.ForeignKey('item.id'),nullable=False)
-	bids = db.relationship('Bid', backref='auction', lazy=True)
+	def __init__(self):
+		id = db.Column(db.Integer, primary_key=True)
+		price = db.Column(db.Float, unique=True, nullable=False)
+		placeby = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
+		onitem = db.Column(db.Integer, db.ForeignKey('item.id'),nullable=False)
+		bids = db.relationship('Bid', backref='auction', lazy=True)
 	def __repr__(self):
 		return '<Auction %r>' % self.price
 
 #reset old DB
 db.drop_all()
+
+
 #initalize DB
 db.create_all()
-
 #create 3 user
 u1 = User(id='1',username='UserOne',password='111')
 u2 = User(id='2',username='UserSecond',password='222')
 u3 = User(id='3',username='UserThree',password='333')
 
 #create an item
-i1=Item(id='1',name='baseball',description='golden baseball')
+i1=Item(id='1',name='baseball',description='golden baseball', ownner='1')
 
 #Item BASEBALL auctionned by UserOne
 auc1=Auction(id='1',price='800.80',placeby='1',onitem='1')
@@ -95,6 +100,10 @@ bid4 = Bid(id='4',price='899.99',placeby='3',onitem='1',auction='1')
 Session = sessionmaker(bind=engine)
 se = Session()
 
+#try to find every bids placed on BASEBALL
+baseballbids = se.execute("select * from Bid where onitem=:id", {'id':1})
+connection = se.connection(Bid)
+
 #Perform a query to find out which user placed the highest bid
 highbid = Bid.query.order_by(Bid.price).first()
 highbid_user_id = highbid.placeby
@@ -102,4 +111,5 @@ highbid_user= User.query.get(highbid_user_id)
 highbid_user_name = highbid_user.username
 print(highbid_user_name)
 
-
+#initalize DB
+db.create_all()
